@@ -57,7 +57,7 @@ class DatabaseManager:
     
     async def disconnect(self) -> None:
         """Close MongoDB connection."""
-        if self._client:
+        if self._client is not None:
             self._client.close()
             logger.info("Disconnected from MongoDB")
     
@@ -71,7 +71,7 @@ class DatabaseManager:
         Returns:
             Motor collection instance
         """
-        if not self.db:
+        if self.db is None:
             raise RuntimeError("Database not connected. Call connect() first.")
         return self.db[collection_name]
 

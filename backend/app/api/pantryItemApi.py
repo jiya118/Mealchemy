@@ -6,7 +6,7 @@ from typing import Optional
 
 from app.database.db import get_database, db_manager
 from app.services.pantryItemCrud import get_pantry_item_crud, PantryItemCRUD
-from app.schema.pantyItem import (
+from app.schema.pantryItem import (
     PantryItemCreate,
     PantryItemUpdate,
     PantryItemResponse,

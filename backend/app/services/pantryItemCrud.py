@@ -7,11 +7,13 @@ from bson import ObjectId
 from typing import Optional, Any
 from datetime import datetime
 
-from app.schema.pantyItem import (
+from app.schema.pantryItem import (
     PantryItemCreate,
     PantryItemUpdate,
     PantryItemResponse,
-    PantryItemList
+    PantryItemList,
+    CategoryEnum,
+    UnitEnum
 )
 
 
@@ -36,6 +38,35 @@ class PantryItemCRUD:
         """Prepare database document for response."""
         if item:
             item["_id"] = str(item["_id"])
+            
+            # Map 'item_name' to 'name' (seed data uses 'item_name')
+            if "name" not in item and "item_name" in item:
+                item["name"] = item.pop("item_name")
+            elif "name" not in item:
+                item["name"] = "Unknown Item"
+                
+            # Handle invalid/missing categories
+            valid_categories = [c.value for c in CategoryEnum]
+            if "category" not in item or item.get("category") not in valid_categories:
+                item["category"] = CategoryEnum.OTHER
+                
+            # Handle invalid/missing units
+            valid_units = [u.value for u in UnitEnum]
+            if "unit" not in item or item.get("unit") not in valid_units:
+                item["unit"] = UnitEnum.PIECES
+                
+            # Handle missing quantity
+            if "quantity" not in item:
+                item["quantity"] = 0.0
+                
+            # Add safe defaults for timestamps if missing
+            from datetime import datetime
+            now = datetime.utcnow()
+            if "created_at" not in item:
+                item["created_at"] = now
+            if "updated_at" not in item:
+                item["updated_at"] = now
+                
         return item
     
     async def create(self, item_data: PantryItemCreate) -> PantryItemResponse:

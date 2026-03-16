@@ -10,15 +10,24 @@ from enum import Enum
 class CategoryEnum(str, Enum):
     """Pantry item categories."""
     GRAINS = "grains"
+    GRAINS_AND_CEREALS = "Grains & Cereals"
     CANNED_GOODS = "canned_goods"
     SPICES = "spices"
+    SPICES_AND_CONDIMENTS = "Spices & Condiments"
     CONDIMENTS = "condiments"
     BAKING = "baking"
+    BAKERY_AND_SNACKS = "Bakery & Snacks"
     SNACKS = "snacks"
-    BEVERAGES = "beverages"
-    DAIRY = "dairy"
+    BEVERAGES = "Beverages"
+    DAIRY = "Dairy"
+    EGGS = "Eggs"
+    VEGETABLES = "Vegetables"
+    FRUITS = "Fruits"
+    OILS = "Oils"
+    SUGAR_AND_SWEETENERS = "Sugar & Sweeteners"
     FROZEN = "frozen"
     OTHER = "other"
+    PULSES_AND_LENTILS = "Pulses & Lentils"
 
 
 class UnitEnum(str, Enum):
@@ -26,13 +35,19 @@ class UnitEnum(str, Enum):
     PIECES = "pieces"
     GRAMS = "grams"
     KILOGRAMS = "kilograms"
+    KG = "kg"
     MILLILITERS = "milliliters"
+    ML = "ml"
     LITERS = "liters"
+    LITER = "liter"
     OUNCES = "ounces"
     POUNDS = "pounds"
     CUPS = "cups"
     TABLESPOONS = "tablespoons"
     TEASPOONS = "teaspoons"
+    SLICES = "slices"
+    PACK = "pack"
+    PACKS = "packs"
 
 
 class PantryItemBase(BaseModel):
@@ -41,9 +56,7 @@ class PantryItemBase(BaseModel):
     category: CategoryEnum = Field(default=CategoryEnum.OTHER)
     quantity: float = Field(..., ge=0)
     unit: UnitEnum = Field(default=UnitEnum.PIECES)
-    location: Optional[str] = Field(None, max_length=100)
     expiry_date: Optional[datetime] = None
-    notes: Optional[str] = Field(None, max_length=500)
     
     @field_validator('name')
     @classmethod
@@ -65,9 +78,7 @@ class PantryItemUpdate(BaseModel):
     category: Optional[CategoryEnum] = None
     quantity: Optional[float] = Field(None, ge=0)
     unit: Optional[UnitEnum] = None
-    location: Optional[str] = Field(None, max_length=100)
     expiry_date: Optional[datetime] = None
-    notes: Optional[str] = Field(None, max_length=500)
     
     @field_validator('name')
     @classmethod
@@ -93,9 +104,7 @@ class PantryItemInDB(PantryItemBase):
                 "category": "grains",
                 "quantity": 5.0,
                 "unit": "kilograms",
-                "location": "Pantry Shelf 2",
                 "expiry_date": "2025-12-31T00:00:00",
-                "notes": "Organic brand",
                 "created_at": "2024-01-15T10:30:00",
                 "updated_at": "2024-01-15T10:30:00"
             }
