@@ -1,0 +1,30 @@
+# FastAPI and server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Database
+motor==3.3.2
+pymongo==4.6.1
+
+# Validation and settings
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.1.2
+python-dotenv==1.0.0
+
+# Image processing (for grocery detection)
+opencv-python==4.9.0.80
+Pillow==10.2.0
+
+# AI / ML
+ultralytics==8.1.0
+numpy==1.26.3
+scikit-learn==1.4.0
+
+# HTTP requests
+requests==2.31.0
