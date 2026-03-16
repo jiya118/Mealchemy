@@ -7,7 +7,7 @@ from bson import ObjectId
 from typing import Optional, Any
 from datetime import datetime
 
-from schemas.pantry_item import (
+from app.schema.pantyItem import (
     PantryItemCreate,
     PantryItemUpdate,
     PantryItemResponse,

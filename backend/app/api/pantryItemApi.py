@@ -4,9 +4,9 @@ API endpoints for pantry items.
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Optional
 
-from config.database import get_database, db_manager
-from crud.pantry_item import get_pantry_item_crud, PantryItemCRUD
-from schemas.pantry_item import (
+from app.database.db import get_database, db_manager
+from app.services.pantryItemCrud import get_pantry_item_crud, PantryItemCRUD
+from app.schema.pantyItem import (
     PantryItemCreate,
     PantryItemUpdate,
     PantryItemResponse,

@@ -6,9 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
 
-from config.settings import settings
-from config.database import db_manager
-from api.v1 import pantry_items
+from app.core.settings import settings
+from app.database.db import db_manager
+from app.api import pantryItemApi
 
 # Configure logging
 logging.basicConfig(
@@ -59,7 +59,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(
-    pantry_items.router,
+    pantryItemApi.router,
     prefix=settings.API_V1_PREFIX
 )
 
