@@ -1,9 +1,21 @@
+<<<<<<< HEAD
 # Environment variables
 .env
+=======
+# Environments
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+env/
+ENV/
+>>>>>>> 8e62f6a04083c43c3e697413499ae66811366d22
 
 # Python
 __pycache__/
 *.py[cod]
+<<<<<<< HEAD
 *.pyo
 *.egg-info/
 dist/
@@ -16,11 +28,38 @@ venv/
 env/
 
 # IDE
+=======
+*$py.class
+*.so
+.pytest_cache/
+htmlcov/
+.coverage
+.tox/
+build/
+dist/
+*.egg-info/
+
+# Node/JavaScript
+node_modules/
+dist/
+build/
+.npm/
+npm-debug.log*
+
+# IDEs and Editors
+>>>>>>> 8e62f6a04083c43c3e697413499ae66811366d22
 .vscode/
 .idea/
 *.swp
 *.swo
+<<<<<<< HEAD
 
 # OS
 .DS_Store
 Thumbs.db
+=======
+.DS_Store
+
+# Logs
+*.log
+>>>>>>> 8e62f6a04083c43c3e697413499ae66811366d22
