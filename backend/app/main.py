@@ -9,6 +9,7 @@ import logging
 from app.core.settings import settings
 from app.database.db import db_manager
 from app.api import pantryItemApi
+from app.api import meal_plans_api
 
 # Configure logging
 logging.basicConfig(
@@ -63,6 +64,11 @@ app.include_router(
     prefix=settings.API_V1_PREFIX
 )
 
+app.include_router(
+    meal_plans_api.router,
+    prefix="/api/meal-plan",
+    tags=["Meal Planning"]
+)
 
 @app.get("/")
 async def root():
