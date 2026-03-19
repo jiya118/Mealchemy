@@ -214,8 +214,9 @@ class MealPlanGenerator:
         if "analyzedInstructions" in full_recipe and full_recipe["analyzedInstructions"]:
             for instruction_set in full_recipe["analyzedInstructions"]:
                 for step in instruction_set.get("steps", []):
-                    instructions.append(step.get("step", ""))
-        elif "instructions" in full_recipe:
+                    if step.get("step"):
+                        instructions.append(step.get("step"))
+        elif full_recipe.get("instructions"):
             instructions = [full_recipe["instructions"]]
         
         return Recipe(

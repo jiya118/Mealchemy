@@ -4,7 +4,7 @@ CRUD operations for meal plans.
 from motor.motor_asyncio import AsyncIOMotorCollection
 from bson import ObjectId
 from typing import Optional, List, Dict, Any
-from datetime import datetime, date, timedelta  
+from datetime import datetime, date, timedelta  # Added timedelta
 import logging
 
 from app.schema.meal_plan import (
@@ -72,9 +72,12 @@ class MealPlanCRUD:
             days_until_monday = 7
         week_start = today + timedelta(days=days_until_monday)
         
+        # Convert date to datetime for MongoDB
+        week_start_datetime = datetime.combine(week_start, datetime.min.time())
+        
         plan_dict = {
             "user_id": None,  # For future multi-user support
-            "week_start_date": week_start,
+            "week_start_date": week_start_datetime,
             "status": MealPlanStatusEnum.ACTIVE.value,
             "config": config,
             "meals": [meal.model_dump() for meal in weekly_meals],
@@ -315,5 +318,3 @@ class MealPlanCRUD:
 def get_meal_plan_crud(collection: AsyncIOMotorCollection) -> MealPlanCRUD:
     """Factory function to create MealPlanCRUD instance."""
     return MealPlanCRUD(collection)
-
-

@@ -104,7 +104,7 @@ class Settings(BaseSettings):
     )
     
     GROQ_MODEL: str = Field(
-        default="llama-3.1-70b-versatile",
+        default="llama-3.3-70b-versatile",
         description="Groq LLM model identifier"
     )
     

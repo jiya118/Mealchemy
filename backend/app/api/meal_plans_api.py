@@ -40,14 +40,18 @@ async def get_pantry_crud_instance() -> PantryItemCRUD:
     return get_pantry_item_crud(collection)
 
 
+from typing import Union
+from app.schema.simplified_meal_plan import SimplifiedMealPlanResponse
+
 @router.post(
     "/generate",
-    response_model=MealPlanResponse,
+    response_model=Union[SimplifiedMealPlanResponse, MealPlanResponse],
     status_code=status.HTTP_201_CREATED,
     summary="Generate weekly meal plan"
 )
 async def generate_meal_plan(
     config: MealPlanCreate,
+    simplified: bool = Query(default=True, description="Return simplified response (recommended)"),
     meal_plan_crud: MealPlanCRUD = Depends(get_meal_plan_crud_instance),
     pantry_crud: PantryItemCRUD = Depends(get_pantry_crud_instance)
 ):
@@ -58,6 +62,7 @@ async def generate_meal_plan(
     - **diet_type**: standard, vegetarian, vegan, eggetarian
     - **servings**: Number of servings per recipe
     - **days**: Number of days to plan (default 7)
+    - **simplified**: Return clean format (just day, recipe name, shopping) - default True
     
     The system will:
     1. Analyze current pantry inventory
@@ -93,9 +98,9 @@ async def generate_meal_plan(
         recipe_collection = db_manager.get_collection("recipes")
         recipe_crud = get_recipe_crud(recipe_collection)
 
-        # Use new optimized generator
-        from app.services.meal_plan_generator_v2 import MealPlanGenerator
-        generator = MealPlanGenerator(pantry_items, recipe_crud)
+        # Use new agentic generator (v3)
+        from app.services.meal_plan_generator_v3 import MealPlanGeneratorV3
+        generator = MealPlanGeneratorV3(pantry_items, recipe_crud)
         
         # Generate the weekly meal plan
         weekly_meals, shopping_list, expiry_warnings = await generator.generate_weekly_plan(plan_config)
@@ -110,7 +115,12 @@ async def generate_meal_plan(
         
         logger.info(f"Meal plan created with ID: {saved_plan.id}")
         
-        return saved_plan
+        # Return simplified or full response
+        if simplified:
+            from app.schema.simplified_meal_plan import convert_to_simplified_response
+            return convert_to_simplified_response(saved_plan)
+        else:
+            return saved_plan
         
     except HTTPException:
         raise
