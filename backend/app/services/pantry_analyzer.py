@@ -37,7 +37,6 @@ class PantryAnalyzer:
                 "unit": item.unit,
                 "category": item.category,
                 "expiry_date": item.expiry_date,
-                "location": item.location
             }
         
         logger.info(f"Initialized virtual pantry with {len(self.virtual_pantry)} items")

@@ -4,7 +4,7 @@ CRUD operations for meal plans.
 from motor.motor_asyncio import AsyncIOMotorCollection
 from bson import ObjectId
 from typing import Optional, List, Dict, Any
-from datetime import datetime, date
+from datetime import datetime, date, timedelta  
 import logging
 
 from app.schema.meal_plan import (

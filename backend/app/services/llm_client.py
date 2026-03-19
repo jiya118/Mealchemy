@@ -41,7 +41,7 @@ class LLMClient:
             "model": self.model,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": 500
+            "max_tokens": 2000  # Increased for meal planning
         }
         
         try:

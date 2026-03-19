@@ -8,6 +8,7 @@ import logging
 from app.database.db import db_manager
 from app.crud.mealplanCrud import get_meal_plan_crud, MealPlanCRUD
 from app.crud.pantryItemCrud import get_pantry_item_crud, PantryItemCRUD
+from app.crud.recipe import get_recipe_crud
 from app.schema.meal_plan import (
     MealPlanCreate,
     MealPlanResponse,
@@ -20,7 +21,6 @@ from app.schema.meal_plan import (
     Meal
 )
 from app.schema.pantryItem import PantryItemResponse
-from app.services.meal_plan_generator import MealPlanGenerator
 from app.services.pantry_analyzer import PantryAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -89,8 +89,15 @@ async def generate_meal_plan(
             days=config.days
         )
         
-        # Generate meal plan
-        generator = MealPlanGenerator(pantry_items)
+        # Get recipe CRUD for cache access
+        recipe_collection = db_manager.get_collection("recipes")
+        recipe_crud = get_recipe_crud(recipe_collection)
+
+        # Use new optimized generator
+        from app.services.meal_plan_generator_v2 import MealPlanGenerator
+        generator = MealPlanGenerator(pantry_items, recipe_crud)
+        
+        # Generate the weekly meal plan
         weekly_meals, shopping_list, expiry_warnings = await generator.generate_weekly_plan(plan_config)
         
         # Save to database
@@ -245,17 +252,71 @@ async def regenerate_meal(
         # Get expiring items
         expiring_items = analyzer.get_expiring_items(days=plan.config.days)
         
-        # Generate new meal
-        generator = MealPlanGenerator(pantry_items)
+        # Get recipe CRUD for cache access
+        recipe_collection = db_manager.get_collection("recipes")
+        recipe_crud = get_recipe_crud(recipe_collection)
+        
+        # Generate new meal using optimized generator
+        from app.services.meal_plan_generator_v2 import MealPlanGenerator
+        generator = MealPlanGenerator(pantry_items, recipe_crud)
         generator.pantry_analyzer = analyzer  # Use our adjusted analyzer
         generator.config = plan.config
         
-        new_meal, shopping_items = await generator._generate_single_meal(
-            virtual_pantry=virtual_pantry,
-            expiring_items=expiring_items,
-            meal_type=request.meal_type,
-            day_num=target_day_index
+        # For regeneration, we'll use the fallback method with a single meal
+        # This is simpler than re-running the full LLM orchestration for one meal
+        from app.services.recipe_cache_manager import RecipeCacheManager
+        cache_manager = RecipeCacheManager(recipe_crud)
+        
+        available_ingredients = analyzer.get_available_ingredients()
+        recipe_candidates = await cache_manager.get_recipe_candidates(
+            pantry_ingredients=available_ingredients,
+            diet_type=plan.config.diet_type.value,
+            meal_type=request.meal_type.value,
+            target_count=5
         )
+        
+        if recipe_candidates:
+            # Pick first available recipe
+            cached_recipe = recipe_candidates[0]
+            recipe = generator._convert_cached_to_recipe(cached_recipe, plan.config)
+            
+            # Categorize ingredients
+            ingredients_used = []
+            shopping_items = []
+            
+            for ing in recipe.ingredients:
+                is_available, pantry_item = analyzer.check_ingredient_availability(
+                    ing.name, ing.quantity
+                )
+                
+                if is_available and pantry_item:
+                    ing.from_pantry = True
+                    ing.pantry_item_id = pantry_item["id"]
+                    ingredients_used.append(ing)
+                else:
+                    from app.schema.meal_plan import ShoppingListItem
+                    shopping_items.append(ShoppingListItem(
+                        name=ing.name,
+                        quantity=ing.quantity,
+                        unit=ing.unit,
+                        needed_for=[]
+                    ))
+            
+            new_meal = Meal(
+                meal_type=request.meal_type,
+                recipe=recipe,
+                ingredients_used=ingredients_used,
+                shopping_list=shopping_items,
+                note="Regenerated meal",
+                match_score=75.0,
+                is_completed=False,
+                completed_at=None
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No suitable recipes found for regeneration"
+            )
         
         # Update the meal in the plan
         updated_plan = await meal_plan_crud.update_meal(
