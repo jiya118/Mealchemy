@@ -66,8 +66,7 @@ app.include_router(
 
 app.include_router(
     meal_plans_api.router,
-    prefix="/api/meal-plan",
-    tags=["Meal Planning"]
+    prefix= settings.API_V1_PREFIX
 )
 
 @app.get("/")
