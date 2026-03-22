@@ -1,8 +1,9 @@
 """
-API endpoints for meal planning.
+API endpoints for meal planning - COMPLETE VERSION
+Merged: New v2 generator + All existing endpoints
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from typing import Optional, List
+from typing import Optional, List, Union
 import logging
 
 from app.database.db import db_manager
@@ -21,7 +22,9 @@ from app.schema.meal_plan import (
     Meal
 )
 from app.schema.pantryItem import PantryItemResponse
+from app.schema.simplified_meal_plan import SimplifiedMealPlanResponse, convert_to_simplified_response
 from app.services.pantry_analyzer import PantryAnalyzer
+from app.services.clean_output_formatter import format_clean_meal_plan  # NEW
 
 logger = logging.getLogger(__name__)
 
@@ -40,14 +43,15 @@ async def get_pantry_crud_instance() -> PantryItemCRUD:
     return get_pantry_item_crud(collection)
 
 
-from typing import Union
-from app.schema.simplified_meal_plan import SimplifiedMealPlanResponse
+# ============================================================================
+# GENERATE ENDPOINTS (OLD v3 + NEW v2)
+# ============================================================================
 
 @router.post(
     "/generate",
     response_model=Union[SimplifiedMealPlanResponse, MealPlanResponse],
     status_code=status.HTTP_201_CREATED,
-    summary="Generate weekly meal plan"
+    summary="Generate weekly meal plan (OLD v3 generator)"
 )
 async def generate_meal_plan(
     config: MealPlanCreate,
@@ -56,7 +60,7 @@ async def generate_meal_plan(
     pantry_crud: PantryItemCRUD = Depends(get_pantry_crud_instance)
 ):
     """
-    Generate a complete weekly meal plan based on pantry inventory.
+    Generate a complete weekly meal plan using OLD agentic generator (v3).
     
     - **meals_per_day**: 1, 2, or 3 meals per day
     - **diet_type**: standard, vegetarian, vegan, eggetarian
@@ -71,7 +75,7 @@ async def generate_meal_plan(
     4. Create shopping list for missing items
     5. Provide helpful notes and warnings
     """
-    logger.info(f"Generating meal plan with config: {config}")
+    logger.info(f"Generating meal plan with OLD v3 generator: {config}")
     
     try:
         # Fetch all pantry items
@@ -98,7 +102,7 @@ async def generate_meal_plan(
         recipe_collection = db_manager.get_collection("recipes")
         recipe_crud = get_recipe_crud(recipe_collection)
 
-        # Use new agentic generator (v3)
+        # Use old agentic generator (v3)
         from app.services.meal_plan_generator_v3 import MealPlanGeneratorV3
         generator = MealPlanGeneratorV3(pantry_items, recipe_crud)
         
@@ -117,7 +121,6 @@ async def generate_meal_plan(
         
         # Return simplified or full response
         if simplified:
-            from app.schema.simplified_meal_plan import convert_to_simplified_response
             return convert_to_simplified_response(saved_plan)
         else:
             return saved_plan
@@ -131,6 +134,84 @@ async def generate_meal_plan(
             detail=f"Failed to generate meal plan: {str(e)}"
         )
 
+
+@router.post("/generate-v2", summary="Generate meal plan (NEW single-shot v4)")
+async def generate_meal_plan_v2(
+    config: MealPlanCreate,
+    pantry_crud: PantryItemCRUD = Depends(get_pantry_crud_instance)
+):
+    """
+    Generate meal plan using NEW single-shot generator (v4).
+    
+    Returns CLEAN, MINIMAL format:
+    {
+        "status": "success",
+        "meal_plan": {
+            "monday": ["Recipe 1", "Recipe 2"],
+            "tuesday": ["Recipe 3"],
+            ...
+        },
+        "shopping_list": ["item1", "item2", ...]
+    }
+    
+    - **meals_per_day**: 1, 2, or 3 meals per day
+    - **diet_type**: standard, vegetarian, vegan, eggetarian
+    - **servings**: Number of servings per recipe
+    - **days**: Number of days to plan
+    """
+    logger.info(f"V2 Meal plan request (NEW generator): {config.dict()}")
+    
+    try:
+        # Fetch all pantry items
+        pantry_result = await pantry_crud.get_all(skip=0, limit=1000)
+        pantry_items = pantry_result.items
+        
+        if not pantry_items:
+            return {
+                'status': 'error',
+                'error': 'No pantry items found',
+                'suggestion': 'Please add ingredients to your pantry first'
+            }
+        
+        logger.info(f"Found {len(pantry_items)} pantry items")
+        
+        # Get recipe CRUD for cache access
+        recipe_collection = db_manager.get_collection("recipes")
+        recipe_crud = get_recipe_crud(recipe_collection)
+        
+        # Use NEW single-shot generator (v4)
+        from app.services.single_shot_meal_planner import SingleShotMealPlanGenerator
+        generator = SingleShotMealPlanGenerator(
+            pantry_items=pantry_items,
+            recipe_crud=recipe_crud
+        )
+        
+        # Generate plan
+        result = await generator.generate_meal_plan(
+            days=config.days,
+            diet_type=config.diet_type.value,
+            servings=config.servings
+        )
+        
+        # Format to clean output
+        clean_output = format_clean_meal_plan(result)
+        
+        return clean_output
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"V2 generation error: {str(e)}", exc_info=True)
+        return {
+            'status': 'error',
+            'error': str(e),
+            'suggestion': 'Please try again or contact support'
+        }
+
+
+# ============================================================================
+# GET ENDPOINTS
+# ============================================================================
 
 @router.get(
     "",
@@ -199,6 +280,10 @@ async def get_meal_plan(
     
     return plan
 
+
+# ============================================================================
+# UPDATE/MODIFY ENDPOINTS
+# ============================================================================
 
 @router.post(
     "/{plan_id}/regenerate",
@@ -450,6 +535,10 @@ async def complete_meal(
             detail=f"Failed to complete meal: {str(e)}"
         )
 
+
+# ============================================================================
+# DELETE ENDPOINT
+# ============================================================================
 
 @router.delete(
     "/{plan_id}",
