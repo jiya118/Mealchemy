@@ -63,3 +63,5 @@ Thumbs.db
 # Logs
 *.log
 >>>>>>> 8e62f6a04083c43c3e697413499ae66811366d22
+yolov8n.pt
+models.txt
