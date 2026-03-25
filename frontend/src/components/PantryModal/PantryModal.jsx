@@ -47,7 +47,11 @@ export default function PantryModal({ isOpen, onClose, onSubmit, initialData }) 
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(formData);
+        const dataToSubmit = { ...formData };
+        if (!dataToSubmit.expiry_date) {
+            dataToSubmit.expiry_date = null;
+        }
+        onSubmit(dataToSubmit);
     };
 
     return (

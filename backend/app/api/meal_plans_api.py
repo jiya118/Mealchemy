@@ -190,7 +190,8 @@ async def generate_meal_plan_v2(
         result = await generator.generate_meal_plan(
             days=config.days,
             diet_type=config.diet_type.value,
-            servings=config.servings
+            servings=config.servings,
+            meals_per_day=config.meals_per_day
         )
         
         # Format to clean output

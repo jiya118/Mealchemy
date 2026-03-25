@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     )
     
     API_V1_PREFIX: str = Field(
-        default="/api",
+        default="/api/v1",
         description="API version 1 route prefix"
     )
     
@@ -104,13 +104,34 @@ class Settings(BaseSettings):
     )
     
     GROQ_MODEL: str = Field(
-        default="llama-3.3-70b-versatile",
+        default="meta-llama/llama-4-scout-17b-16e-instruct",
         description="Groq LLM model identifier"
     )
     
     GROQ_BASE_URL: str = Field(
         default="https://api.groq.com/openai/v1",
         description="Groq API base URL"
+    )
+
+    # Gemini API - Google Generative AI
+    GEMINI_API_KEY_GROCERY: str = Field(
+        ...,
+        description="Gemini API key for grocery image recognition"
+    )
+
+    GEMINI_API_KEY_MEAL_PLANNER: str = Field(
+        ...,
+        description="Gemini API key for meal planning"
+    )
+
+    GEMINI_MODEL: str = Field(
+        default="gemini-1.5-flash",
+        description="Gemini model identifier"
+    )
+
+    GEMINI_BASE_URL: str = Field(
+        default="https://generativelanguage.googleapis.com",
+        description="Gemini API base URL"
     )
     
     # ============================================================================
@@ -182,7 +203,7 @@ class Settings(BaseSettings):
     # ============================================================================
     # FIELD VALIDATORS
     # ============================================================================
-    @field_validator("JWT_SECRET_KEY", "SPOONACULAR_API_KEY", "GROQ_API_KEY")
+    @field_validator("JWT_SECRET_KEY", "SPOONACULAR_API_KEY", "GROQ_API_KEY", "GEMINI_API_KEY_GROCERY", "GEMINI_API_KEY_MEAL_PLANNER")
     @classmethod
     def validate_not_empty(cls, v: str) -> str:
         """Ensure critical API keys and secrets are not empty."""
@@ -190,7 +211,7 @@ class Settings(BaseSettings):
             raise ValueError("This field cannot be empty")
         return v.strip()
     
-    @field_validator("SPOONACULAR_BASE_URL", "GROQ_BASE_URL")
+    @field_validator("SPOONACULAR_BASE_URL", "GROQ_BASE_URL", "GEMINI_BASE_URL")
     @classmethod
     def validate_url(cls, v: str) -> str:
         """Ensure URLs are properly formatted."""
@@ -267,6 +288,12 @@ class Settings(BaseSettings):
                 "model": self.GROQ_MODEL,
                 "base_url": self.GROQ_BASE_URL,
             },
+            "gemini": {
+                "api_key_grocery": self.GEMINI_API_KEY_GROCERY,
+                "api_key_meal_planner": self.GEMINI_API_KEY_MEAL_PLANNER,
+                "model": self.GEMINI_MODEL,
+                "base_url": self.GEMINI_BASE_URL,
+            },
         }
     
     def validate_configuration(self) -> dict[str, bool]:
@@ -281,6 +308,8 @@ class Settings(BaseSettings):
             "jwt_secret": bool(self.JWT_SECRET_KEY and len(self.JWT_SECRET_KEY) >= 32),
             "spoonacular_api": bool(self.SPOONACULAR_API_KEY),
             "groq_api": bool(self.GROQ_API_KEY),
+            "gemini_api_grocery": bool(self.GEMINI_API_KEY_GROCERY),
+            "gemini_api_meal_planner": bool(self.GEMINI_API_KEY_MEAL_PLANNER),
         }
 
 

@@ -64,24 +64,29 @@ class AgenticMealPlanner:
         
         meal_type = "dinner" if config.meals_per_day == 1 else "lunch and dinner"
         
-        prompt = f"""You are a meal planner. Plan {config.days} days of {meal_type} for {config.servings} person(s).
+        prompt = f"""You are a meal planner. You MUST only suggest meals that can be made from the ingredients currently in the user's pantry. Plan {config.days} days of {meal_type} for {config.servings} person(s).
 
 DIET: {config.diet_type}
 
-RULES:
-1. Weekdays (Mon-Fri): Quick meals (≤30 min)
-2. Weekends: Can be elaborate (≤60 min)
-3. Use expiring items first
-4. Don't repeat main ingredients within 3 days
-5. Search cache first, call Spoonacular only if needed (max 2 calls)
+STRICT RULES:
+1. Always call get_current_pantry FIRST before planning anything.
+2. Search for recipes using the ACTUAL pantry ingredients — not random ingredients.
+3. A recipe should only be selected if at least 70% of its required ingredients are available in the pantry.
+4. If a recipe needs 1-2 missing ingredients, those MUST be added to shopping_needed for that meal.
+5. Do NOT suggest meals that require ingredients not in the pantry unless absolutely necessary.
+6. Prioritize using ingredients that are expiring soonest (earliest expiry_date).
+7. After each meal is planned, call update_virtual_pantry to deduct used ingredients so the next day's meal is planned based on what actually remains.
+8. Weekdays (Mon-Fri): Quick meals (≤30 min). Weekends: Can be elaborate (≤60 min).
+9. Don't repeat main ingredients within 3 days.
+10. Search cache first, call Spoonacular only if needed (max 2 calls).
 
 WORKFLOW PER DAY:
 1. Call get_current_pantry()
-2. Pick 2-3 main ingredients (proteins/vegetables)
-3. Call search_cached_recipes(["chicken", "tomatoes"])
-4. If cache has 3+ options: Pick one
-5. If cache <3: Call search_spoonacular(["chicken"], count=5)
-6. Call get_recipe_details(recipe_id) - this will reject non-meals (condiments/drinks/sides)
+2. Pick 2-3 main ingredients FROM THE PANTRY (proteins/vegetables, prioritize expiring items)
+3. Call search_cached_recipes(["chicken", "tomatoes"]) — use REAL pantry items here
+4. If cache has 3+ options: Pick the best one
+5. If cache <3: Call search_spoonacular(["chicken"], count=5) — max 2 Spoonacular calls total
+6. Call get_recipe_details(recipe_id) — this will reject non-meals (condiments/drinks/sides)
 7. If rejected, search for a different recipe
 8. Once you have a valid meal, call update_virtual_pantry([{{"name": "chicken", "quantity": 200, "unit": "g"}}])
 9. REPEAT for ALL {config.days} days
@@ -90,8 +95,9 @@ CRITICAL: Plan meals for ALL {config.days} days (monday through {self.DAYS_OF_WE
 
 IMPORTANT:
 - Focus on MAIN ingredients (proteins, vegetables)
-- Ignore spices/oils/flour/sugar
+- Ignore spices/oils/flour/sugar when searching
 - Max 2 Spoonacular calls total
+- The final output must include a total_shopping_list of all missing ingredients across all days
 
 OUTPUT (JSON only):
 {{
@@ -106,6 +112,7 @@ OUTPUT (JSON only):
       "shopping_needed": []
     }}
   ],
+  "total_shopping_list": [{{"name": "soy sauce", "quantity": 1, "unit": "tbsp"}}],
   "summary": {{
     "total_spoonacular_calls": 1
   }}

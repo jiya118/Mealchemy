@@ -126,11 +126,32 @@ class MealPlanGeneratorV3:
             cached_recipe = await self.recipe_crud.get_by_recipe_id(recipe_id)
             
             if not cached_recipe:
-                logger.error(f"Recipe {recipe_id} not found in cache")
-                continue
-            
-            # Convert to Recipe format
-            recipe = self._convert_cached_to_recipe(cached_recipe, config)
+                logger.warning(f"Recipe {recipe_id} not found in cache. Creating dynamic recipe.")
+                
+                # Create a dynamic mock recipe from LLM's suggested meal
+                dyn_ingredients = []
+                for ing_data in meal_data.get("ingredients_used", []):
+                    dyn_ingredients.append(RecipeIngredient(
+                        name=ing_data.get("name", "Unknown"),
+                        quantity=ing_data.get("quantity", 0),
+                        unit=ing_data.get("unit", ""),
+                        from_pantry=True
+                    ))
+                    
+                recipe = Recipe(
+                    id=abs(hash(meal_data.get("recipe_name", "AI Custom")) % 10000) + 10000,
+                    name=meal_data.get("recipe_name", "AI Custom Recipe"),
+                    image=None,
+                    ready_in_minutes=meal_data.get("prep_time", 30),
+                    servings=config.servings,
+                    ingredients=dyn_ingredients,
+                    instructions=["1. Prepare ingredients as listed.", "2. Combine and cook using standard methods.", "3. Enjoy your custom AI-generated meal!"],
+                    source_url=None
+                )
+            else:
+                # Convert to Recipe format
+                recipe = self._convert_cached_to_recipe(cached_recipe, config)
+
             
             # Parse ingredients from LLM plan
             ingredients_used = []

@@ -63,8 +63,7 @@ class MealPlanningTools:
                             },
                             "max_results": {
                                 "type": "integer",
-                                "description": "Maximum recipes to return (default 10)",
-                                "default": 10
+                                "description": "Maximum recipes to return (default 10)"
                             }
                         },
                         "required": ["ingredients"]
@@ -86,8 +85,7 @@ class MealPlanningTools:
                             },
                             "count": {
                                 "type": "integer",
-                                "description": "Number of recipes to fetch (max 10)",
-                                "default": 5
+                                "description": "Number of recipes to fetch (max 10)"
                             },
                             "diet_type": {
                                 "type": "string",
