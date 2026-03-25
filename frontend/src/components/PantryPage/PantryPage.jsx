@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import usePantryItems from '../../hooks/usePantryItems';
 import PantryToolbar from '../PantryToolbar/PantryToolbar';
 import PantryTable from '../PantryTable/PantryTable';
 import PantrySummaryCards from '../PantrySummaryCards/PantrySummaryCards';
 import PantryModal from '../PantryModal/PantryModal';
+import GroceryScanner from '../GroceryScanner/GroceryScanner';
+import ScanResultsModal from '../ScanResultsModal/ScanResultsModal';
 import './PantryPage.css';
 
 export default function PantryPage() {
@@ -32,6 +35,11 @@ export default function PantryPage() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
+
+    /* —— Scanner state —————————————————————————————————— */
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
+    const [scanResult, setScanResult] = useState(null);
+    const [isResultsOpen, setIsResultsOpen] = useState(false);
 
     const handleAddClick = () => {
         setEditingItem(null);
@@ -63,6 +71,42 @@ export default function PantryPage() {
         }
     };
 
+    /* —— Scanner flow —————————————————————————————————— */
+    const handleScanClick = () => {
+        setIsScannerOpen(true);
+    };
+
+    const handleScanComplete = (result) => {
+        setIsScannerOpen(false);
+        setScanResult(result);
+        setIsResultsOpen(true);
+    };
+
+    const handleSaveScannedItems = async (itemsToSave) => {
+        let saved = 0;
+        let failed = 0;
+
+        for (const item of itemsToSave) {
+            try {
+                await addItem(item);
+                saved++;
+            } catch (err) {
+                console.error(`Failed to save "${item.name}":`, err);
+                failed++;
+            }
+        }
+
+        setIsResultsOpen(false);
+        setScanResult(null);
+
+        if (saved > 0) {
+            toast.success(`🎉 ${saved} item${saved !== 1 ? 's' : ''} added to your pantry!`);
+        }
+        if (failed > 0) {
+            toast.error(`⚠️ ${failed} item${failed !== 1 ? 's' : ''} failed to save.`);
+        }
+    };
+
     return (
         <div className="pantry-page">
             <header className="pantry-header">
@@ -84,6 +128,7 @@ export default function PantryPage() {
                     category={category}
                     onCategoryChange={handleCategoryChange}
                     onAddClick={handleAddClick}
+                    onScanClick={handleScanClick}
                 />
 
                 <PantryTable
@@ -136,6 +181,25 @@ export default function PantryPage() {
                 }}
                 onSubmit={handleModalSubmit}
                 initialData={editingItem}
+            />
+
+            {/* —— Grocery Scanner ——————————————————————— */}
+            {isScannerOpen && (
+                <GroceryScanner
+                    onScanComplete={handleScanComplete}
+                    onClose={() => setIsScannerOpen(false)}
+                />
+            )}
+
+            {/* —— Scan Results Modal ———————————————————— */}
+            <ScanResultsModal
+                isOpen={isResultsOpen}
+                detectionResult={scanResult}
+                onSave={handleSaveScannedItems}
+                onClose={() => {
+                    setIsResultsOpen(false);
+                    setScanResult(null);
+                }}
             />
         </div>
     );

@@ -1,0 +1,236 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GroceryScanner — Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Backdrop ─────────────────────────────────────────────────────── */
+.scanner-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    animation: fadeIn var(--transition-fast) ease-out;
+    backdrop-filter: blur(4px);
+}
+
+/* ── Panel ─────────────────────────────────────────────────────────── */
+.scanner-panel {
+    background: var(--bg-card);
+    border-radius: var(--border-radius-xl);
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow-float);
+    width: min(560px, 92vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: scaleIn var(--transition-normal) ease-out;
+    position: relative;
+}
+
+/* ── Header ───────────────────────────────────────────────────────── */
+.scanner-header {
+    padding: var(--space-lg) var(--space-xl);
+    border-bottom: 2px solid var(--border-color);
+    position: relative;
+}
+
+.scanner-header h2 {
+    font-family: var(--font-display);
+    font-size: var(--font-size-2xl);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.scanner-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.scanner-close-btn {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--border-radius-pill);
+    background: var(--color-cream-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+.scanner-close-btn:hover {
+    background: var(--color-danger-light);
+    color: var(--color-danger);
+    transform: scale(1.1);
+}
+
+/* ── Body ─────────────────────────────────────────────────────────── */
+.scanner-body {
+    padding: var(--space-lg) var(--space-xl);
+}
+
+/* ── Drop zone ────────────────────────────────────────────────────── */
+.drop-zone {
+    border: 3px dashed var(--color-primary-300);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-3xl) var(--space-xl);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    background: var(--color-primary-50);
+}
+.drop-zone:hover {
+    border-color: var(--color-primary-500);
+    background: var(--color-primary-100);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+.drop-zone.drag-over {
+    border-color: var(--color-accent-400);
+    background: var(--color-accent-50);
+    transform: scale(1.02);
+    box-shadow: var(--shadow-lg);
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.drop-icon {
+    font-size: 3rem;
+    animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+.drop-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.drop-hint {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+}
+
+/* ── Image preview ────────────────────────────────────────────────── */
+.image-preview-container {
+    position: relative;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    animation: fadeInUp var(--transition-normal) ease-out;
+}
+
+.image-preview {
+    width: 100%;
+    max-height: 360px;
+    object-fit: contain;
+    background: var(--color-cream-100);
+    display: block;
+}
+
+.clear-image-btn {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--border-radius-pill);
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+    transition: all var(--transition-fast);
+}
+.clear-image-btn:hover {
+    background: var(--color-danger);
+    transform: scale(1.15);
+}
+
+/* ── Error ─────────────────────────────────────────────────────────── */
+.scanner-error {
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-danger-light);
+    color: var(--color-danger-dark);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    animation: fadeInUp var(--transition-fast) ease-out;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────── */
+.scanner-footer {
+    padding: var(--space-md) var(--space-xl) var(--space-lg);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    border-top: 2px solid var(--border-color);
+}
+
+.btn-cancel-scan {
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--border-radius-pill);
+    background: var(--color-cream-200);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: var(--font-size-md);
+    transition: all var(--transition-fast);
+}
+.btn-cancel-scan:hover {
+    background: var(--color-cream-300);
+    color: var(--text-primary);
+}
+
+.btn-scan {
+    padding: var(--space-sm) var(--space-xl);
+    border-radius: var(--border-radius-pill);
+    background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+    color: var(--text-on-primary);
+    font-weight: 700;
+    font-size: var(--font-size-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+}
+.btn-scan:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-500));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+.btn-scan:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ── Spinner ──────────────────────────────────────────────────────── */
+.scan-spinner {
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

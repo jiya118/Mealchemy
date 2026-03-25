@@ -8,6 +8,7 @@ export default function PantryToolbar({
     category,
     onCategoryChange,
     onAddClick,
+    onScanClick,
 }) {
     return (
         <div className="pantry-toolbar">
@@ -39,6 +40,12 @@ export default function PantryToolbar({
                 </select>
                 <span className="select-chevron">▼</span>
             </div>
+
+            {/* Scan Groceries Button */}
+            <button className="scan-btn" onClick={onScanClick}>
+                <span className="btn-icon">📷</span>
+                Scan Groceries
+            </button>
 
             {/* Add Button */}
             <button className="add-item-btn" onClick={onAddClick}>

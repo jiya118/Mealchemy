@@ -134,6 +134,46 @@
     transform: rotate(90deg);
 }
 
+/* ── Scan Groceries button ─────────────────────────────────────────── */
+.scan-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--color-accent-400), var(--color-accent-500));
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--font-size-md);
+    border-radius: var(--border-radius-lg);
+    border: 2px solid var(--color-accent-500);
+    box-shadow: var(--shadow-sm), 0 4px 0 var(--color-accent-700);
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    position: relative;
+    top: 0;
+}
+
+.scan-btn:hover {
+    background: linear-gradient(135deg, var(--color-accent-300), var(--color-accent-400));
+    box-shadow: var(--shadow-md), 0 6px 0 var(--color-accent-700);
+    top: -2px;
+}
+
+.scan-btn:active {
+    top: 2px;
+    box-shadow: var(--shadow-sm), 0 1px 0 var(--color-accent-700);
+}
+
+.scan-btn .btn-icon {
+    font-size: 1.2rem;
+    transition: transform var(--transition-bounce);
+}
+
+.scan-btn:hover .btn-icon {
+    transform: scale(1.2);
+}
+
 /* ── Responsive ────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .pantry-toolbar {
@@ -149,6 +189,7 @@
         width: 100%;
     }
 
+    .scan-btn,
     .add-item-btn {
         width: 100%;
         justify-content: center;

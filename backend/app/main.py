@@ -10,6 +10,7 @@ from app.core.settings import settings
 from app.database.db import db_manager
 from app.api import pantryItemApi
 from app.api import meal_plans_api
+from app.api import grocery_recognition_api
 
 # Configure logging
 logging.basicConfig(
@@ -67,6 +68,11 @@ app.include_router(
 app.include_router(
     meal_plans_api.router,
     prefix= settings.API_V1_PREFIX
+)
+
+app.include_router(
+    grocery_recognition_api.router,
+    prefix=settings.API_V1_PREFIX
 )
 
 @app.get("/")
