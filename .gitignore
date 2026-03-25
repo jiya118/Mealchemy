@@ -65,3 +65,15 @@ Thumbs.db
 >>>>>>> 8e62f6a04083c43c3e697413499ae66811366d22
 yolov8n.pt
 models.txt
+# Debug / temp files
+*.txt
+test_*.py
+out*.txt
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Env
+.env
+venv/
