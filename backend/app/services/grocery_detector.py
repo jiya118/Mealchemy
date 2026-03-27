@@ -12,7 +12,7 @@ import re
 import base64
 
 from PIL import Image
-from openai import OpenAI
+import google.generativeai as genai
 
 from app.core.settings import settings
 from app.schema.grocery_recognition import (
@@ -54,7 +54,7 @@ class GroceryDetector:
     Uses the OpenAI-compatible Groq API for image analysis.
     """
     _instance = None
-    _client = None
+    _model = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -62,17 +62,15 @@ class GroceryDetector:
         return cls._instance
 
     def _ensure_client(self):
-        if self._client is None:
-            logger.info("Configuring Groq client for grocery detection...")
-            self._client = OpenAI(
-                api_key=settings.GROQ_API_KEY,
-                base_url=settings.GROQ_BASE_URL,
-            )
-            logger.info("Groq client ready.")
+        if self._model is None:
+            logger.info("Configuring Gemini client for grocery detection...")
+            genai.configure(api_key=settings.GEMINI_API_KEY_GROCERY)
+            self._model = genai.GenerativeModel(settings.GEMINI_MODEL)
+            logger.info("Gemini client ready.")
 
     def detect(self, image_bytes: bytes) -> GroceryDetectionResponse:
         """
-        Send image to Groq Llama 4 Scout and parse detected grocery items.
+        Send image to Gemini and parse detected grocery items.
         """
         self._ensure_client()
 
@@ -80,39 +78,16 @@ class GroceryDetector:
         pil_image = Image.open(io.BytesIO(image_bytes))
         img_width, img_height = pil_image.size
 
-        # Prepare image as base64 data URI
-        image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-
-        # Detect content type
-        pil_format = pil_image.format or "JPEG"
-        mime_map = {"JPEG": "image/jpeg", "PNG": "image/png", "WEBP": "image/webp"}
-        mime_type = mime_map.get(pil_format.upper(), "image/jpeg")
-
-        data_uri = f"data:{mime_type};base64,{image_b64}"
-
-        # Send to Groq via OpenAI-compatible API
-        logger.info(f"Sending image to Groq ({settings.GROQ_MODEL}) for recognition...")
-        response = self._client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": DETECTION_PROMPT},
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": data_uri},
-                        },
-                    ],
-                }
-            ],
-            temperature=0.3,
-            max_tokens=4096,
+        # Send to Gemini
+        logger.info(f"Sending image to Gemini ({settings.GEMINI_MODEL}) for recognition...")
+        response = self._model.generate_content(
+            [DETECTION_PROMPT, pil_image],
+            generation_config={"temperature": 0.3}
         )
 
         # Parse the JSON response
-        raw_text = response.choices[0].message.content.strip()
-        logger.info(f"Groq raw response: {raw_text[:200]}...")
+        raw_text = response.text.strip()
+        logger.info(f"Gemini raw response: {raw_text[:200]}...")
 
         # Remove markdown code fences if present
         json_text = raw_text
