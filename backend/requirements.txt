@@ -26,6 +26,8 @@ ultralytics==8.1.0
 numpy==1.26.3
 scikit-learn==1.4.0
 google-generativeai==0.8.4
+groq==0.4.2
+tenacity==8.2.3
 
 # HTTP requests
 requests==2.31.0

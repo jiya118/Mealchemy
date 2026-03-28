@@ -91,6 +91,49 @@ class SpoonacularClient:
         
         return result
     
+    def search_recipes_by_query(
+        self,
+        query: str,
+        number: int = 5,
+        diet: Optional[str] = None,
+        intolerances: Optional[str] = None,
+        add_recipe_information: bool = True
+    ) -> List[Dict[str, Any]]:
+        """
+        Search recipes by name/query string (NOT cached - used for LLM suggestions).
+
+        Args:
+            query: Recipe name or search term
+            number: Number of results to return
+            diet: Diet type (vegetarian, vegan, etc.)
+            intolerances: Comma-separated intolerances
+            add_recipe_information: Whether to include full recipe info
+
+        Returns:
+            List of recipe dicts with id, title, readyInMinutes, etc.
+        """
+        params: Dict[str, Any] = {
+            "query": query,
+            "number": number,
+            "addRecipeInformation": add_recipe_information,
+        }
+
+        if diet and diet != "standard":
+            params["diet"] = diet
+        if intolerances:
+            params["intolerances"] = intolerances
+
+        logger.info(f"Searching Spoonacular by query: '{query}' (diet={diet})")
+
+        try:
+            result = self._make_request("recipes/complexSearch", params)
+            recipes = result.get("results", [])
+            logger.info(f"Found {len(recipes)} results for query '{query}'")
+            return recipes
+        except Exception as e:
+            logger.error(f"search_recipes_by_query failed for '{query}': {e}")
+            return []
+
     @lru_cache(maxsize=settings.RECIPE_CACHE_SIZE)
     def get_recipe_details(self, recipe_id: int) -> Dict[str, Any]:
         """

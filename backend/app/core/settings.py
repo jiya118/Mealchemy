@@ -52,7 +52,6 @@ class Settings(BaseSettings):
     
     GROQ_API_KEY: str = Field(...)
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
-    GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
 
     GEMINI_API_KEY_GROCERY: str = Field(...)
     GEMINI_API_KEY_MEAL_PLANNER: str = Field(...)
@@ -67,6 +66,8 @@ class Settings(BaseSettings):
     DEFAULT_SERVINGS: int = 1
     EXPIRY_WARNING_DAYS: int = 7
     MIN_INGREDIENT_MATCH_PERCENTAGE: int = 50
+    RECIPE_CACHE_SIZE: int = 100
+    RECIPE_CACHE_TTL: int = 86400
 
     # ============================================================================
     # PYDANTIC CONFIGURATION

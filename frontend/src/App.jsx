@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import PantryPage from './components/PantryPage/PantryPage';
+import MealPlannerPage from './components/MealPlannerPage/MealPlannerPage';
 import './index.css';
 
+const NAV_ITEMS = [
+  { id: 'pantry', label: '🧺 Pantry', component: PantryPage },
+  { id: 'planner', label: '🍳 Meal Planner', component: MealPlannerPage },
+];
+
 function App() {
+  const [activePage, setActivePage] = useState('pantry');
+  const ActiveComponent = NAV_ITEMS.find(n => n.id === activePage)?.component ?? PantryPage;
+
   return (
     <>
       <Toaster
@@ -26,7 +35,22 @@ function App() {
           },
         }}
       />
-      <PantryPage />
+
+      {/* ── Top navigation ─────────────────── */}
+      <nav className="app-nav">
+        {NAV_ITEMS.map(item => (
+          <button
+            key={item.id}
+            id={`nav-${item.id}`}
+            className={`app-nav-btn ${activePage === item.id ? 'app-nav-btn--active' : ''}`}
+            onClick={() => setActivePage(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      <ActiveComponent />
     </>
   );
 }

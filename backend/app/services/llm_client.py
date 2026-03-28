@@ -16,7 +16,7 @@ class LLMClient:
     """Client for LLM-powered meal planning features using Groq."""
     
     def __init__(self):
-        self.base_url = settings.GROQ_BASE_URL
+        self.base_url = "https://api.groq.com/openai/v1"
         self.api_key = settings.GROQ_API_KEY
         self.model = settings.GROQ_MODEL
         self.timeout = 30.0
