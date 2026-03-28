@@ -52,6 +52,8 @@ class Settings(BaseSettings):
     
     GROQ_API_KEY: str = Field(...)
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    
+    MEAL_PLANNER_PROVIDER: str = "groq" # 'groq' or 'gemini'
 
     GEMINI_API_KEY_GROCERY: str = Field(...)
     GEMINI_API_KEY_MEAL_PLANNER: str = Field(...)

@@ -59,11 +59,14 @@ def get_llm_service() -> LLMRecipeService:
     """Get or create singleton LLM service."""
     global _llm_service
     if _llm_service is None:
+        model_name = settings.GROQ_MODEL if settings.MEAL_PLANNER_PROVIDER.lower() == "groq" else settings.GEMINI_MODEL
         _llm_service = LLMRecipeService(
+            provider=settings.MEAL_PLANNER_PROVIDER,
             groq_api_key=settings.GROQ_API_KEY,
-            model="llama-3.3-70b-versatile",
+            gemini_api_key=settings.GEMINI_API_KEY_MEAL_PLANNER,
+            model=model_name,
         )
-        logger.info("LLM service initialized")
+        logger.info(f"LLM service initialized using provider: {settings.MEAL_PLANNER_PROVIDER}")
     return _llm_service
 
 
