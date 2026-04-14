@@ -244,8 +244,12 @@ export default function MealPlannerPage() {
                     <span>😟</span>
                     <div>
                         <strong>Oops!</strong> {error}
-                        <br />
-                        <small>Make sure your pantry has some items first.</small>
+                        {error && error.toLowerCase().includes('pantry') && (
+                            <>
+                                <br />
+                                <small>Make sure your pantry has some items first.</small>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

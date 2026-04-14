@@ -50,6 +50,23 @@
     margin-top: var(--space-xs);
 }
 
+.model-badge {
+    display: inline-block;
+    margin-top: var(--space-xs);
+    padding: 3px 8px;
+    border-radius: var(--border-radius-pill);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+}
+.model-badge.custom_model {
+    background: var(--color-success-light);
+    color: var(--color-success-dark);
+}
+.model-badge.gemini_fallback {
+    background: var(--color-warning-light);
+    color: var(--color-warning-dark);
+}
+
 .results-close-btn {
     width: 32px;
     height: 32px;

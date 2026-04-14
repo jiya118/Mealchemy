@@ -104,6 +104,7 @@ export default function ScanResultsModal({ isOpen, detectionResult, onSave, onCl
                             {detectionResult?.total_instances || 0} items detected •
                             Review and edit before saving to your pantry
                         </p>
+
                     </div>
                     <button className="results-close-btn" onClick={onClose}>✖</button>
                 </div>
