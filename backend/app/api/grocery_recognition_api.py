@@ -1,5 +1,9 @@
 """
 API endpoint for grocery recognition via image upload.
+
+Supports two-stage detection:
+  Stage 1 — Custom YOLOv8 model (fast, offline)
+  Stage 2 — Gemini API fallback (when Stage 1 is insufficient)
 """
 import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
@@ -29,8 +33,9 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
     summary="Detect grocery items in an uploaded image",
     description=(
         "Upload a photo of groceries and the system will detect items "
-        "using Google Gemini 1.5 Flash. Returns a list of detected items "
-        "with estimated quantities and categories."
+        "using a two-stage pipeline: first a custom YOLOv8 model, then "
+        "Gemini API as fallback. Returns detected items with quantities, "
+        "categories, and which model was used."
     ),
 )
 async def detect_groceries(
@@ -40,10 +45,15 @@ async def detect_groceries(
     ),
 ):
     """
-    Detect grocery items in an uploaded image using Gemini AI.
+    Detect grocery items in an uploaded image.
+
+    Two-stage pipeline:
+      1. Custom YOLOv8 model (best.pt) — returns directly if confident enough
+      2. Gemini API fallback — used when Stage 1 is insufficient
 
     - Accepts JPEG, PNG, WebP images up to 10 MB
-    - Returns detected items with name, quantity, category, and unit
+    - Returns detected items with name, quantity, category, unit, and confidence
+    - Returns which model was used: 'custom_model' or 'gemini_fallback'
     - User should review/edit results before saving to pantry
     """
     # ── Validate file type ────────────────────────────────────────────
@@ -71,11 +81,12 @@ async def detect_groceries(
             detail="Uploaded file is empty.",
         )
 
-    # ── Run detection ─────────────────────────────────────────────────
+    # ── Run two-stage detection ───────────────────────────────────────
     try:
         result = grocery_detector.detect(image_bytes=image_bytes)
         logger.info(
-            f"Grocery detection complete: {result.total_items_detected} types, "
+            f"Grocery detection complete | model_used={result.model_used} | "
+            f"{result.total_items_detected} types, "
             f"{result.total_instances} instances"
         )
         return result

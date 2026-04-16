@@ -137,7 +137,11 @@ class PantryItemCRUD:
             query["category"] = category
         
         if search:
-            query["name"] = {"$regex": search, "$options": "i"}
+            # Search both 'name' and 'item_name' (old seed data uses item_name)
+            query["$or"] = [
+                {"name": {"$regex": search, "$options": "i"}},
+                {"item_name": {"$regex": search, "$options": "i"}},
+            ]
         
         # Determine sort direction
         sort_direction = ASCENDING if sort_order == "asc" else DESCENDING
@@ -145,10 +149,11 @@ class PantryItemCRUD:
         # Get total count
         total = await self.collection.count_documents(query)
         
-        # Get paginated items
-        cursor = self.collection.find(query).sort(
-            sort_by, sort_direction
-        ).skip(skip).limit(limit)
+        # Get paginated items — always include _id as tiebreaker for stable pagination
+        cursor = self.collection.find(query).sort([
+            (sort_by, sort_direction),
+            ("_id", ASCENDING),
+        ]).skip(skip).limit(limit)
         
         items = []
         async for item in cursor:

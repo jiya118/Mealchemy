@@ -66,6 +66,10 @@ class GroceryDetectionResponse(BaseModel):
     )
     image_width: int = Field(..., description="Original image width in pixels")
     image_height: int = Field(..., description="Original image height in pixels")
+    model_used: str = Field(
+        default="gemini_fallback",
+        description="Which model produced the results: 'custom_model' or 'gemini_fallback'"
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -74,7 +78,8 @@ class GroceryDetectionResponse(BaseModel):
                 "total_items_detected": 3,
                 "total_instances": 7,
                 "image_width": 1920,
-                "image_height": 1080
+                "image_height": 1080,
+                "model_used": "custom_model"
             }
         }
     }
