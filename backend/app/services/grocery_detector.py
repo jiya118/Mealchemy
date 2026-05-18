@@ -120,6 +120,12 @@ class GroceryDetector:
         """Load the custom YOLOv8 model once. Never crashes the app."""
         try:
             from ultralytics import YOLO
+            import torch
+            import ultralytics.nn.tasks
+            
+            # Allow ultralytics DetectionModel for PyTorch 2.6+ weights_only=True default
+            if hasattr(torch.serialization, 'add_safe_globals'):
+                torch.serialization.add_safe_globals([ultralytics.nn.tasks.DetectionModel])
 
             # Resolve model path relative to the backend directory
             model_path = Path(__file__).resolve().parents[2] / "models" / "best.pt"
